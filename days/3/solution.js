@@ -1,13 +1,4 @@
-const puzzleInput = 312051
-
-// найти на какой стороне (top/right/bottom/left) распологается число
-// найти положение ~ центра стороны (количество шагов до центра)
-// + найти положение ~ 1
-// сложить расстояния
-
-const n = 46
-
-console.log('n', n)
+// code doesn't designed to work for n = 1
 
 /*
 square number   range of numbers    sqrt of the max number in range
@@ -27,60 +18,93 @@ const getSquareNumber = (n) => {
 
     // for the south-east corner digit
     return (halfSqrt - Math.floor(halfSqrt)) === 0.5 ? 
-        halfSqrtRounded - 1 : halfSqrtRounded
+        halfSqrtRounded : halfSqrtRounded + 1
 }
 
-const squareNumber = getSquareNumber(n)
-
-console.log('squareNumber', squareNumber)
 
 // how many digits in square
-// also this is the number of steps to the middle
-const numberOfSquareDigits = (squareNumber) => squareNumber * 8
+const getSquareNumbersCount = (squareNumber) => (squareNumber - 1) * 8
 
-const nosd =  numberOfSquareDigits(squareNumber)
+//const getSquareSideNumbersCount = (squareNumbersCount) => (squareNumbersCount / 4) + 1 // whole side
+const getSquareSideNumbersCount = (squareNumbersCount) => squareNumbersCount / 4
 
-console.log('nosd', nosd)
 
-const digitsAtSide = (nosd) => nosd / 4
+const getBiggestNumberInSquare = (squareNumber) => Math.pow((2 * (squareNumber - 1) + 1), 2)
 
-const dat = digitsAtSide(nosd)
 
-console.log('dat', dat)
+const getNumberPositionInSquare = (number, squareNumbersCount, biggestNumberInSquare, sideNumbersCount) => {
+    const numberPosition = squareNumbersCount - (biggestNumberInSquare - number)
 
-const biggestNumberInSquare = (squareNumber) => Math.pow((2 * squareNumber + 1), 2)
+    // shift because of the right side first number is actually biggest number in square
+    const shiftPosition = numberPosition < sideNumbersCount
 
-const bnis = biggestNumberInSquare(squareNumber)
-
-console.log('bnis', bnis)
-
-const numberInSquare = nosd - (bnis - n)
-
-console.log('numberInSquare', numberInSquare)
-
-const contin = numberInSquare / dat
-
-console.log('contin', contin)
-
-// 0 right, 1 top, 2 left, 3 and 4 floor (except biggest in the side)
-let side = Math.floor(contin)
-
-if (side = 4) side = 3
-
-console.log('side', side)
-
-// check this and below
-const sidePosition = contin - side
-
-console.log('sidePosition', sidePosition)
-
-let stepsToTheMiddle = dat / sidePosition
-
-// SE number
-if (sidePosition === 1) {
-    stepsToTheMiddle = dat / 2
-} else if (sidePosition < 0.5) {
-
+    return {
+        shiftPosition,
+        number: shiftPosition ? (numberPosition + 1) : numberPosition
+    }
 }
 
-console.log('stepsToTheMiddle', stepsToTheMiddle)
+
+const getStepsToSideMiddle = (numberPositionInSquare, sideNumbersCount, shiftPosition) => {
+    const numberPositionInSquareSide = numberPositionInSquare / sideNumbersCount
+
+    console.log('numberPositionInSquareSide', numberPositionInSquareSide)
+
+    // if number isn't the second ending number in the right side and numberPositionInSquareSide hasn't fractional part 
+    // then n located at the square corner
+    if (!(shiftPosition) && !String(numberPositionInSquareSide).split('.')[1]) {
+        return sideNumbersCount / 2
+    } else {
+        // 0 right, 1 top, 2 left, 3 and 4 floor (except biggest in the side)
+        let side = Math.floor(numberPositionInSquareSide)
+
+        if (side === 4) side = 3
+
+        console.log('side', side)
+
+        return Math.round(
+            Math.abs(
+                (sideNumbersCount / 2) + (shiftPosition ? 1 : 0) -
+                (!(shiftPosition && numberPositionInSquare === sideNumbersCount) ?
+                    numberPositionInSquareSide - side
+                    : 1
+                ) * sideNumbersCount
+            )
+        )
+    }
+
+    return stepsToSideMiddle
+}
+
+const getStepsToAccessPort = (n) => {
+    console.log('n', n)
+
+    // let's find out the number of numbers square in which our number is
+    const squareNumber = getSquareNumber(n)
+    console.log('squareNumber', squareNumber)
+
+    // let's find out position of the number relative to the square side middle
+    const squareNumbersCount = getSquareNumbersCount(squareNumber)
+    console.log('squareNumbersCount', squareNumbersCount)
+
+    const sideNumbersCount = getSquareSideNumbersCount(squareNumbersCount)
+    console.log('sideNumbersCount', sideNumbersCount)
+
+    const biggestNumberInSquare = getBiggestNumberInSquare(squareNumber)
+    console.log('biggestNumberInSquare', biggestNumberInSquare)
+
+    const {number: numberPositionInSquare, shiftPosition} = getNumberPositionInSquare(
+        n,
+        squareNumbersCount,
+        biggestNumberInSquare,
+        sideNumbersCount
+    )
+    console.log('numberPositionInSquare', numberPositionInSquare, 'shiftPosition', shiftPosition)
+
+    const stepsToSideMiddle = getStepsToSideMiddle(numberPositionInSquare, sideNumbersCount, shiftPosition)
+    console.log('stepsToSideMiddle', stepsToSideMiddle)
+
+    return stepsToSideMiddle + (squareNumber - 1)
+}
+
+//console.log('stepsToAccessPort', getStepsToAccessPort())
