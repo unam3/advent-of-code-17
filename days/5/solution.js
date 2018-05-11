@@ -33,23 +33,15 @@ let stepsCount = 0
 const countStepsToExit = () => {
     const instruction = offsets[offset]
 
-    if (typeof instruction !== 'undefined') {
-        offsets[offset] += 1
+    offsets[offset] += 1
 
-        offset = offset + instruction
-        
-        stepsCount += 1
-    } else {
-        return stepsCount
-    }
+    offset += instruction
 }
 
-while (true) {
-    const allSteps = countStepsToExit()
-
-    if (typeof allSteps !== 'undefined') {
-        console.log('stepsCount:', allSteps)
-
-        break
-    }
+while (typeof offsets[offset] !== 'undefined') {
+    countStepsToExit()
+    
+    stepsCount += 1
 }
+
+console.log('stepsCount:', stepsCount)
